@@ -1,7 +1,6 @@
 import cv2
 import time
 import mediapipe as mp
-import sys
 import modellib as M
 from PIL import Image
 
@@ -36,54 +35,54 @@ while True:
     if not results.multi_hand_landmarks:
         counter = 0
         prediction = ""
-
+    else:
     # Otherwise, detect and crop each hand
-    for handLms in results.multi_hand_landmarks:
-        x_max = 0
-        y_max = 0
-        x_min = w
-        y_min = h
-        for lm in handLms.landmark:
-            # Get the coordinates of each landmark
-            x, y = int(lm.x * w), int(lm.y * h)
+        for handLms in results.multi_hand_landmarks:
+            x_max = 0
+            y_max = 0
+            x_min = w
+            y_min = h
+            for lm in handLms.landmark:
+                # Get the coordinates of each landmark
+                x, y = int(lm.x * w), int(lm.y * h)
 
-            # Find the maximum and minimum coordinates to crop the image
-            if x > x_max:
-                x_max = x + 100
-            if x < x_min:
-                x_min = x - 100
-            if y > y_max:
-                y_max = y + 100
-            if y < y_min:
-                y_min = y - 100
+                # Find the maximum and minimum coordinates to crop the image
+                if x > x_max:
+                    x_max = x + 100
+                if x < x_min:
+                    x_min = x - 100
+                if y > y_max:
+                    y_max = y + 100
+                if y < y_min:
+                    y_min = y - 100
 
-        # Adjust the crop size to make it square
-        xdiff = x_max - x_min
-        ydiff = y_max - y_min
-        diff = abs(xdiff-ydiff)
-        if xdiff > ydiff:
-            y_max += int(diff/2)
-            y_min -= int(diff/2)
-        else:
-            x_max += int(diff/2)
-            x_min -= int(diff/2)
+            # Adjust the crop size to make it square
+            xdiff = x_max - x_min
+            ydiff = y_max - y_min
+            diff = abs(xdiff-ydiff)
+            if xdiff > ydiff:
+                y_max += int(diff/2)
+                y_min -= int(diff/2)
+            else:
+                x_max += int(diff/2)
+                x_min -= int(diff/2)
 
-        # Crop the image to the hand region
-        hand_img = img[y_min:y_max, x_min: x_max]
+            # Crop the image to the hand region
+            hand_img = img[y_min:y_max, x_min: x_max]
 
-        # Perform gesture recognition every 60 frames
-        if counter%60 == 0:
-            try:
-                # Preprocess the image for the model
-                hand_img = cv2.resize(hand_img, (200,200), interpolation = cv2.INTER_AREA)
-                hand_img = cv2.cvtColor(hand_img, cv2.COLOR_BGR2RGB)
-                pil_img = Image.fromarray(hand_img)
+            # Perform gesture recognition every 60 frames
+            if counter%60 == 0:
+                try:
+                    # Preprocess the image for the model
+                    hand_img = cv2.resize(hand_img, (200,200), interpolation = cv2.INTER_AREA)
+                    hand_img = cv2.cvtColor(hand_img, cv2.COLOR_BGR2RGB)
+                    pil_img = Image.fromarray(hand_img)
 
-                # Get the prediction from the model
-                conf, prediction = M.get_prediction(pil_img)
+                    # Get the prediction from the model
+                    conf, prediction = M.get_prediction(pil_img)
 
-            except Exception as e:
-                print(str(e))
+                except Exception as e:
+                    print(str(e))
 
         # Draw a rectangle around the hand region
         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
