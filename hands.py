@@ -4,6 +4,7 @@ import mediapipe as mp
 import modellib as M
 from PIL import Image
 
+
 # Open the default camera or a video stream
 cap = cv2.VideoCapture(0)
 
@@ -71,12 +72,14 @@ while True:
             hand_img = img[y_min:y_max, x_min: x_max]
 
             # Perform gesture recognition every 60 frames
-            if counter%60 == 0:
+            if counter%15 == 0:
                 try:
                     # Preprocess the image for the model
                     hand_img = cv2.resize(hand_img, (200,200), interpolation = cv2.INTER_AREA)
                     hand_img = cv2.cvtColor(hand_img, cv2.COLOR_BGR2RGB)
                     pil_img = Image.fromarray(hand_img)
+                    pil_img.save('hande.jpg')
+                    
 
                     # Get the prediction from the model
                     conf, prediction = M.get_prediction(pil_img)
@@ -100,6 +103,8 @@ while True:
     ptime = ctime
     cv2.putText(img, f"FPS: {int(fps)}", (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
     cv2.imshow("Image", img)
+    cv2.resizeWindow("Image", 300, 700)
+
 
     # If 'q' is pressed, the program will break the loop and exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
